@@ -16,6 +16,8 @@ const ListaRestaurantes = () => {
       .then(resposta => {
         setRestaurantes(resposta.data.results)
         setProximaPagina(resposta.data.next)
+        console.log(resposta);
+        
       })
       .catch(erro => {
         console.log(erro)

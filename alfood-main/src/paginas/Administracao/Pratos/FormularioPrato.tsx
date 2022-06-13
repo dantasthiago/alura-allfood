@@ -25,6 +25,14 @@ const FormularioPrato = () => {
 
 	const [imagem, setImagem] = useState<File | null>(null);
 
+	const selecionarArquivo = (evento: React.ChangeEvent<HTMLInputElement>) => {
+		if (evento.target.files?.length) {
+			setImagem(evento.target.files[0]);
+		} else {
+			setImagem(null);
+		}
+	};
+
 	useEffect(() => {
 		http
 			.get<{ tags: ITag[] }>("tags/")
@@ -36,6 +44,35 @@ const FormularioPrato = () => {
 
 	const aoSubmeterForm = (evento: React.FormEvent<HTMLFormElement>) => {
 		evento.preventDefault();
+
+		const formData = new FormData();
+
+		formData.append("nome", nomePrato);
+		formData.append("descricao", descricao);
+		formData.append("tag", tag);
+		formData.append("restaurante", restaurante);
+
+		if (imagem) {
+			formData.append("imagem", imagem);
+		}
+
+		http
+			.request({
+				url: "pratos/",
+				method: "POST",
+				headers: {
+					"Content-type": "multipart/form-data",
+				},
+				data: formData,
+			})
+			.then(() => {
+				setNomePrato('')
+				setDescricao('')
+				setTag('')
+				setRestaurante('')
+				alert("Prato cadastrado com sucesso");
+			})
+			.catch((erro) => console.log(erro));
 	};
 
 	return (
@@ -78,7 +115,7 @@ const FormularioPrato = () => {
 						onChange={(evento) => setTag(evento.target.value)}
 					>
 						{tags.map((tag) => (
-							<MenuItem key={tag.id} value={tag.id}>
+							<MenuItem key={tag.id} value={tag.value}>
 								{tag.value}
 							</MenuItem>
 						))}
@@ -99,7 +136,7 @@ const FormularioPrato = () => {
 					</Select>
 				</FormControl>
 
-					<input type="file" />
+				<input type='file' onChange={selecionarArquivo} />
 
 				<Button
 					sx={{ marginTop: 1 }}
